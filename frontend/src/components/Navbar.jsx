@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Briefcase, PenTool, LogIn, Rocket, Bell, LogOut, User, FileText } from 'lucide-react';
+import { Menu, X, Briefcase, PenTool, LogIn, Bell, LogOut, User, FileText } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser } from '../store/authSlice';
 import useWebSocket from '../hooks/useWebSocket';
@@ -82,14 +82,12 @@ const Navbar = () => {
                         style={{
                             width: '2.5rem',
                             height: '2.5rem',
-                            backgroundColor: 'var(--color-brand-orange)',
-                            borderRadius: '0.75rem',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}
                     >
-                        <Rocket style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} />
+                        <img src="/logo.png" alt="GigFlow" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </motion.div>
                     <span className="font-heading" style={{ fontWeight: 700, fontSize: '1.25rem', color: 'var(--color-brand-black)' }}>
                         Gig<span style={{ color: 'var(--color-brand-orange)' }}>Flow</span>
