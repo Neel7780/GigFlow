@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { createBid, getBidsForGig, hireBid, getMyBids } from '../controllers/bidController';
-import { authMiddleware, asyncHandler, validate } from '../middleware';
+import { authMiddleware, asyncHandler, validate, requireRole } from '../middleware';
 import { createBidSchema } from '../validators/schemas';
 
 const router = Router();
 
-// POST /api/bids - Submit a bid (Protected)
-router.post('/', authMiddleware, validate(createBidSchema), asyncHandler(createBid));
+// POST /api/bids - Submit a bid (Protected - Freelancers only)
+router.post('/', authMiddleware, requireRole('freelancer'), validate(createBidSchema), asyncHandler(createBid));
 
 // GET /api/bids/my - Get user's submitted bids (Protected)
 router.get('/my', authMiddleware, asyncHandler(getMyBids));

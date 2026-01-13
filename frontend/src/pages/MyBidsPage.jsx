@@ -12,13 +12,24 @@ import {
     RefreshCw
 } from 'lucide-react';
 import api from '../api/axios';
+import { useSelector } from 'react-redux';
 
 const MyBidsPage = () => {
     const navigate = useNavigate();
+    const { user } = useSelector((state) => state.auth);
     const [bids, setBids] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('all');
+
+    // Redirect clients - only freelancers have bids
+    useEffect(() => {
+        if (user && user.role === 'client') {
+            navigate('/dashboard', {
+                state: { error: 'Only freelancers can view submitted proposals.' }
+            });
+        }
+    }, [user, navigate]);
 
     const fetchBids = async () => {
         setLoading(true);

@@ -78,6 +78,23 @@ export async function optionalAuthMiddleware(
     }
 }
 
+// Role-based authorization middleware
+// Must be used after authMiddleware
+export function requireRole(role: 'freelancer' | 'client') {
+    return (req: Request, res: Response, next: NextFunction): void => {
+        if (!req.user) {
+            res.status(401).json({ error: 'Authentication required' });
+            return;
+        }
+        if (req.user.role !== role) {
+            const action = role === 'client' ? 'create gigs' : 'place bids';
+            res.status(403).json({ error: `Only ${role}s can ${action}` });
+            return;
+        }
+        next();
+    };
+}
+
 // Validation middleware factory
 export function validate(schema: ZodSchema) {
     return (req: Request, res: Response, next: NextFunction): void => {

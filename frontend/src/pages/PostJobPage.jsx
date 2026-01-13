@@ -14,6 +14,7 @@ import {
     AlertCircle
 } from 'lucide-react';
 import api from '../api/axios';
+import { useSelector } from 'react-redux';
 
 const skillSuggestions = [
     'React', 'Node.js', 'Python', 'JavaScript', 'TypeScript', 'Figma',
@@ -23,6 +24,7 @@ const skillSuggestions = [
 
 const PostJobPage = () => {
     const navigate = useNavigate();
+    const { user } = useSelector((state) => state.auth);
     const [formData, setFormData] = useState({
         title: '',
         category: '',
@@ -38,6 +40,15 @@ const PostJobPage = () => {
     const [error, setError] = useState(null);
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
+
+    // Redirect freelancers - only clients can post jobs
+    useEffect(() => {
+        if (user && user.role === 'freelancer') {
+            navigate('/dashboard', {
+                state: { error: 'Only clients can post jobs. Switch to a client account to hire talent.' }
+            });
+        }
+    }, [user, navigate]);
 
     // Fetch categories from backend
     useEffect(() => {

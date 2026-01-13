@@ -15,7 +15,7 @@ const cookieOptions = {
 
 // Register new user
 export async function register(req: Request, res: Response): Promise<void> {
-    const { name, email, password } = req.body as RegisterInput;
+    const { name, email, password, role } = req.body as RegisterInput;
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -25,7 +25,7 @@ export async function register(req: Request, res: Response): Promise<void> {
     }
 
     // Create user
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name, email, password, role });
 
     // Generate token and set cookie
     const token = generateToken(user._id.toString());
@@ -37,6 +37,7 @@ export async function register(req: Request, res: Response): Promise<void> {
             id: user._id,
             name: user.name,
             email: user.email,
+            role: user.role,
         },
     });
 }
@@ -69,6 +70,7 @@ export async function login(req: Request, res: Response): Promise<void> {
             id: user._id,
             name: user.name,
             email: user.email,
+            role: user.role,
             bio: user.bio,
             skills: user.skills,
             avatar: user.avatar,
@@ -95,6 +97,7 @@ export async function me(req: Request, res: Response): Promise<void> {
             id: user._id,
             name: user.name,
             email: user.email,
+            role: user.role,
             bio: user.bio,
             skills: user.skills,
             avatar: user.avatar,

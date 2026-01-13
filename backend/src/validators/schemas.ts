@@ -11,6 +11,7 @@ export const registerSchema = z.object({
         .string()
         .min(6, 'Password must be at least 6 characters')
         .max(100, 'Password cannot exceed 100 characters'),
+    role: z.enum(['freelancer', 'client']),
 });
 
 export const loginSchema = z.object({

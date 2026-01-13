@@ -430,7 +430,22 @@ const GigDetailsPage = () => {
 
                         {!isOwner && gig.status === 'open' && (
                             <>
-                                {bidSuccess ? (
+                                {/* Only freelancers can place bids */}
+                                {user?.role === 'client' ? (
+                                    <div style={{
+                                        backgroundColor: '#fef3c7',
+                                        border: '1px solid #fcd34d',
+                                        borderRadius: '0.75rem',
+                                        padding: '1rem',
+                                        textAlign: 'center'
+                                    }}>
+                                        <Briefcase style={{ width: '2rem', height: '2rem', color: '#d97706', margin: '0 auto 0.5rem auto' }} />
+                                        <h4 style={{ color: '#92400e', fontWeight: 600, marginBottom: '0.25rem' }}>Client Account</h4>
+                                        <p style={{ color: '#a16207', fontSize: '0.875rem' }}>
+                                            You're logged in as a client. Only freelancers can submit proposals.
+                                        </p>
+                                    </div>
+                                ) : bidSuccess ? (
                                     <div style={{
                                         backgroundColor: '#ecfdf5',
                                         border: '1px solid #a7f3d0',

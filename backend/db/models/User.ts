@@ -6,6 +6,7 @@ export interface IUser extends Document {
     name: string;
     email: string;
     password: string;
+    role: 'freelancer' | 'client';
     bio?: string;
     skills: string[];
     avatar?: string;
@@ -35,6 +36,12 @@ const userSchema = new Schema<IUser>(
             required: [true, 'Password is required'],
             minlength: [6, 'Password must be at least 6 characters'],
             select: false, // Don't include password in queries by default
+        },
+        role: {
+            type: String,
+            enum: ['freelancer', 'client'],
+            required: [true, 'Role is required'],
+            default: 'freelancer',
         },
         bio: {
             type: String,
