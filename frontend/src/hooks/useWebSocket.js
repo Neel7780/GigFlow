@@ -14,6 +14,7 @@ export const useWebSocket = () => {
     const connect = useCallback(() => {
         // Use user.id (returned by auth API) not user._id
         if (!isAuthenticated || !user?.id) {
+            console.log('[WebSocket] Not connecting - authenticated:', isAuthenticated, 'user.id:', user?.id);
             return;
         }
 
@@ -30,11 +31,14 @@ export const useWebSocket = () => {
             wsUrl = wsUrl.replace('https://', 'wss://');
         }
 
-        const ws = new WebSocket(`${wsUrl}?userId=${user.id}`);
+        const fullWsUrl = `${wsUrl}?userId=${user.id}`;
+        console.log('[WebSocket] Connecting to:', fullWsUrl);
+
+        const ws = new WebSocket(fullWsUrl);
         wsRef.current = ws;
 
         ws.onopen = () => {
-            console.log('WebSocket connected');
+            console.log('[WebSocket] Connected successfully');
             setIsConnected(true);
 
             // Start ping interval
@@ -48,6 +52,7 @@ export const useWebSocket = () => {
         ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
+                console.log('[WebSocket] Received message:', data);
 
                 // Ignore PONG messages
                 if (data.type === 'PONG' || data.type === 'CONNECTED') {
@@ -60,9 +65,10 @@ export const useWebSocket = () => {
                     ...data,
                     read: false
                 };
+                console.log('[WebSocket] Adding notification:', notification);
                 setNotifications((prev) => [notification, ...prev].slice(0, 50));
             } catch (error) {
-                console.error('Failed to parse WebSocket message:', error);
+                console.error('[WebSocket] Failed to parse message:', error);
             }
         };
 

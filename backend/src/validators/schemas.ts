@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// Auth schemas
 export const registerSchema = z.object({
     name: z
         .string()
@@ -19,7 +18,6 @@ export const loginSchema = z.object({
     password: z.string().min(1, 'Password is required'),
 });
 
-// User schemas
 export const updateUserSchema = z.object({
     name: z
         .string()
@@ -31,7 +29,6 @@ export const updateUserSchema = z.object({
     avatar: z.string().url('Invalid avatar URL').optional(),
 });
 
-// Category schemas
 export const createCategorySchema = z.object({
     name: z
         .string()
@@ -43,8 +40,6 @@ export const createCategorySchema = z.object({
         .optional(),
 });
 
-// Gig schemas
-// Gig schemas
 export const createGigSchema = z.object({
     title: z
         .string()
@@ -63,7 +58,6 @@ export const createGigSchema = z.object({
     category: z.string().optional(), // Allow category name or ID as fallback
 });
 
-// Bid schemas
 export const createBidSchema = z.object({
     gigId: z.string().min(1, 'Gig ID is required'),
     message: z
@@ -73,7 +67,6 @@ export const createBidSchema = z.object({
     price: z.number().min(1, 'Price must be at least 1'),
 });
 
-// Query schemas
 export const paginationSchema = z.object({
     page: z.coerce.number().min(1).default(1),
     limit: z.coerce.number().min(1).max(50).default(10),
@@ -84,7 +77,6 @@ export const gigQuerySchema = paginationSchema.extend({
     category: z.string().optional(),
 });
 
-// Type exports
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;

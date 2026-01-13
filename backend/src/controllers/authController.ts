@@ -13,21 +13,17 @@ const cookieOptions = {
     path: '/',
 };
 
-// Register new user
 export async function register(req: Request, res: Response): Promise<void> {
     const { name, email, password, role } = req.body as RegisterInput;
 
-    // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
         res.status(409).json({ error: 'Email already registered' });
         return;
     }
 
-    // Create user
     const user = await User.create({ name, email, password, role });
 
-    // Generate token and set cookie
     const token = generateToken(user._id.toString());
     res.cookie('token', token, cookieOptions);
 
@@ -42,18 +38,15 @@ export async function register(req: Request, res: Response): Promise<void> {
     });
 }
 
-// Login user
 export async function login(req: Request, res: Response): Promise<void> {
     const { email, password } = req.body as LoginInput;
 
-    // Find user with password
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
         res.status(401).json({ error: 'Invalid email or password' });
         return;
     }
 
-    // Verify password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
         res.status(401).json({ error: 'Invalid email or password' });
