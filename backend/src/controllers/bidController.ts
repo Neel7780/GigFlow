@@ -6,7 +6,7 @@ import { CreateBidInput } from '../validators/schemas';
 // WebSocket server URL for notifications
 const WS_SERVER_URL = process.env.WS_SERVER_URL || 'http://localhost:8080';
 
-// Helper to notify WebSocket server
+// Helper to notify WebSocket server when hired
 async function notifyHired(freelancerId: string, gigTitle: string): Promise<void> {
     try {
         await fetch(`${WS_SERVER_URL}/notify`, {
@@ -24,6 +24,32 @@ async function notifyHired(freelancerId: string, gigTitle: string): Promise<void
         });
     } catch (error) {
         console.error('Failed to send WebSocket notification:', error);
+        // Don't fail the request if notification fails
+    }
+}
+
+// Helper to notify gig owner when a bid is placed
+async function notifyBidPlaced(
+    ownerId: string,
+    freelancerName: string,
+    gigTitle: string
+): Promise<void> {
+    try {
+        await fetch(`${WS_SERVER_URL}/notify`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Secret': process.env.API_SECRET || 'shared-secret',
+            },
+            body: JSON.stringify({
+                userId: ownerId,
+                type: 'NEW_BID',
+                message: `${freelancerName} placed a bid on "${gigTitle}"`,
+                gigTitle,
+            }),
+        });
+    } catch (error) {
+        console.error('Failed to send bid notification:', error);
         // Don't fail the request if notification fails
     }
 }
@@ -67,6 +93,9 @@ export async function createBid(req: Request, res: Response): Promise<void> {
 
     const populatedBid = await Bid.findById(bid._id)
         .populate('freelancerId', 'name avatar');
+
+    // Notify gig owner of new bid
+    notifyBidPlaced(gig.ownerId.toString(), req.user!.name, gig.title);
 
     res.status(201).json({
         message: 'Bid submitted successfully',
