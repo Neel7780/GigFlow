@@ -12,7 +12,8 @@ export const useWebSocket = () => {
     const pingIntervalRef = useRef(null);
 
     const connect = useCallback(() => {
-        if (!isAuthenticated || !user?._id) {
+        // Use user.id (returned by auth API) not user._id
+        if (!isAuthenticated || !user?.id) {
             return;
         }
 
@@ -29,7 +30,7 @@ export const useWebSocket = () => {
             wsUrl = wsUrl.replace('https://', 'wss://');
         }
 
-        const ws = new WebSocket(`${wsUrl}?userId=${user._id}`);
+        const ws = new WebSocket(`${wsUrl}?userId=${user.id}`);
         wsRef.current = ws;
 
         ws.onopen = () => {
@@ -75,7 +76,7 @@ export const useWebSocket = () => {
             }
 
             // Attempt reconnection after 5 seconds
-            if (isAuthenticated && user?._id) {
+            if (isAuthenticated && user?.id) {
                 reconnectTimeoutRef.current = setTimeout(() => {
                     connect();
                 }, 5000);
@@ -85,11 +86,11 @@ export const useWebSocket = () => {
         ws.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
-    }, [isAuthenticated, user?._id]);
+    }, [isAuthenticated, user?.id]);
 
     // Connect when authenticated
     useEffect(() => {
-        if (isAuthenticated && user?._id) {
+        if (isAuthenticated && user?.id) {
             connect();
         }
 
@@ -105,7 +106,7 @@ export const useWebSocket = () => {
                 clearInterval(pingIntervalRef.current);
             }
         };
-    }, [isAuthenticated, user?._id, connect]);
+    }, [isAuthenticated, user?.id, connect]);
 
     // Disconnect when logged out
     useEffect(() => {
