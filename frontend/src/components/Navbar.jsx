@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Briefcase, PenTool, LogIn, Rocket, Bell, LogOut, User } from 'lucide-react';
+import { Menu, X, Briefcase, PenTool, LogIn, Rocket, Bell, LogOut, User, FileText } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser } from '../store/authSlice';
 import useWebSocket from '../hooks/useWebSocket';
@@ -19,6 +19,7 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Find Work', path: '/dashboard', icon: Briefcase },
         { name: 'Post Job', path: '/post-job', icon: PenTool },
+        { name: 'My Proposals', path: '/my-bids', icon: FileText, authRequired: true },
     ];
 
     const isActive = (path) => location.pathname === path;
@@ -81,27 +82,29 @@ const Navbar = () => {
 
                 {/* Desktop Navigation */}
                 <div style={{ display: 'none', alignItems: 'center', gap: '0.25rem' }} className="desktop-nav">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.path}
-                            to={link.path}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                borderRadius: '9999px',
-                                fontWeight: 500,
-                                transition: 'all 0.2s',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                textDecoration: 'none',
-                                backgroundColor: isActive(link.path) ? 'var(--color-brand-black)' : 'transparent',
-                                color: isActive(link.path) ? 'white' : 'var(--color-brand-black)'
-                            }}
-                        >
-                            <link.icon style={{ width: '1rem', height: '1rem' }} />
-                            {link.name}
-                        </Link>
-                    ))}
+                    {navLinks
+                        .filter(link => !link.authRequired || isAuthenticated)
+                        .map((link) => (
+                            <Link
+                                key={link.path}
+                                to={link.path}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '9999px',
+                                    fontWeight: 500,
+                                    transition: 'all 0.2s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    textDecoration: 'none',
+                                    backgroundColor: isActive(link.path) ? 'var(--color-brand-black)' : 'transparent',
+                                    color: isActive(link.path) ? 'white' : 'var(--color-brand-black)'
+                                }}
+                            >
+                                <link.icon style={{ width: '1rem', height: '1rem' }} />
+                                {link.name}
+                            </Link>
+                        ))}
                 </div>
 
                 {/* Desktop Auth Buttons / User Menu */}
@@ -264,28 +267,30 @@ const Navbar = () => {
                         }}
                     >
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            {navLinks.map((link) => (
-                                <Link
-                                    key={link.path}
-                                    to={link.path}
-                                    onClick={() => setIsOpen(false)}
-                                    style={{
-                                        padding: '0.75rem 1rem',
-                                        borderRadius: '1rem',
-                                        fontWeight: 500,
-                                        transition: 'all 0.2s',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.75rem',
-                                        textDecoration: 'none',
-                                        backgroundColor: isActive(link.path) ? 'var(--color-brand-black)' : 'transparent',
-                                        color: isActive(link.path) ? 'white' : 'var(--color-brand-black)'
-                                    }}
-                                >
-                                    <link.icon style={{ width: '1.25rem', height: '1.25rem' }} />
-                                    {link.name}
-                                </Link>
-                            ))}
+                            {navLinks
+                                .filter(link => !link.authRequired || isAuthenticated)
+                                .map((link) => (
+                                    <Link
+                                        key={link.path}
+                                        to={link.path}
+                                        onClick={() => setIsOpen(false)}
+                                        style={{
+                                            padding: '0.75rem 1rem',
+                                            borderRadius: '1rem',
+                                            fontWeight: 500,
+                                            transition: 'all 0.2s',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.75rem',
+                                            textDecoration: 'none',
+                                            backgroundColor: isActive(link.path) ? 'var(--color-brand-black)' : 'transparent',
+                                            color: isActive(link.path) ? 'white' : 'var(--color-brand-black)'
+                                        }}
+                                    >
+                                        <link.icon style={{ width: '1.25rem', height: '1.25rem' }} />
+                                        {link.name}
+                                    </Link>
+                                ))}
 
                             <hr style={{ margin: '0.5rem 0', border: 'none', borderTop: '1px solid #e5e5e5' }} />
 

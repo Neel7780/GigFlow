@@ -15,6 +15,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import PostJobPage from './pages/PostJobPage';
 import GigDetailsPage from './pages/GigDetailsPage';
+import MyBidsPage from './pages/MyBidsPage';
 
 // Auth checker component
 function AuthChecker({ children }) {
@@ -58,6 +59,14 @@ function AppRoutes() {
               element={
                 <ProtectedRoute>
                   <GigDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="my-bids"
+              element={
+                <ProtectedRoute>
+                  <MyBidsPage />
                 </ProtectedRoute>
               }
             />

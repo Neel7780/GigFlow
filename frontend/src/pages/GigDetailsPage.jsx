@@ -11,7 +11,9 @@ import {
     Share2,
     Flag,
     ArrowLeft,
-    Send
+    Send,
+    Users,
+    Briefcase
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import api from '../api/axios';
@@ -28,6 +30,9 @@ const GigDetailsPage = () => {
     const [bidPrice, setBidPrice] = useState('');
     const [submittingBid, setSubmittingBid] = useState(false);
     const [bidSuccess, setBidSuccess] = useState(false);
+    const [bids, setBids] = useState([]);
+    const [loadingBids, setLoadingBids] = useState(false);
+    const [hiringBidId, setHiringBidId] = useState(null);
 
     useEffect(() => {
         const fetchGig = async () => {
@@ -44,6 +49,47 @@ const GigDetailsPage = () => {
 
         fetchGig();
     }, [id]);
+
+    // Fetch bids if user is the owner
+    useEffect(() => {
+        const fetchBids = async () => {
+            if (!gig || !user) return;
+            const isOwner = user.id === gig.ownerId._id;
+            if (!isOwner) return;
+
+            setLoadingBids(true);
+            try {
+                const response = await api.get(`/bids/${id}`);
+                setBids(response.data.bids || []);
+            } catch (err) {
+                console.error('Failed to fetch bids:', err);
+            } finally {
+                setLoadingBids(false);
+            }
+        };
+
+        fetchBids();
+    }, [gig, user, id]);
+
+    const handleHire = async (bidId) => {
+        if (!window.confirm('Are you sure you want to hire this freelancer?')) return;
+
+        setHiringBidId(bidId);
+        try {
+            await api.patch(`/bids/${bidId}/hire`);
+            // Refresh gig and bids data
+            const gigResponse = await api.get(`/gigs/${id}`);
+            setGig(gigResponse.data.gig);
+            const bidsResponse = await api.get(`/bids/${id}`);
+            setBids(bidsResponse.data.bids || []);
+            alert('Freelancer hired successfully!');
+        } catch (err) {
+            console.error('Failed to hire:', err);
+            alert(err.response?.data?.error || 'Failed to hire freelancer.');
+        } finally {
+            setHiringBidId(null);
+        }
+    };
 
     const handleBidSubmit = async (e) => {
         e.preventDefault();
@@ -225,6 +271,131 @@ const GigDetailsPage = () => {
                                     </span>
                                 ))}
                             </div>
+                        </div>
+                    )}
+
+                    {/* Bids Section - Only visible to owner */}
+                    {isOwner && (
+                        <div className="card" style={{ padding: '2rem', marginBottom: '2rem', backgroundColor: 'white', borderRadius: '1.5rem', border: '1px solid #e5e5e5' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                                <Users style={{ width: '1.5rem', height: '1.5rem', color: 'var(--color-brand-orange)' }} />
+                                <h2 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>
+                                    Proposals ({bids.length})
+                                </h2>
+                            </div>
+
+                            {loadingBids ? (
+                                <div style={{ textAlign: 'center', padding: '2rem', color: '#71717a' }}>
+                                    Loading proposals...
+                                </div>
+                            ) : bids.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '2rem', color: '#71717a' }}>
+                                    <Briefcase style={{ width: '3rem', height: '3rem', margin: '0 auto 1rem', opacity: 0.5 }} />
+                                    <p>No proposals yet. Share your gig to attract freelancers!</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {bids.map((bid) => (
+                                        <motion.div
+                                            key={bid._id}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            style={{
+                                                padding: '1.5rem',
+                                                borderRadius: '1rem',
+                                                border: bid.status === 'hired' ? '2px solid #22c55e' : '1px solid #e5e5e5',
+                                                backgroundColor: bid.status === 'hired' ? '#f0fdf4' : '#fafafa'
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                    <div style={{
+                                                        width: '2.5rem',
+                                                        height: '2.5rem',
+                                                        borderRadius: '50%',
+                                                        backgroundColor: '#f4f4f5',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center'
+                                                    }}>
+                                                        {bid.freelancerId?.avatar ? (
+                                                            <img src={bid.freelancerId.avatar} alt={bid.freelancerId.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                                                        ) : (
+                                                            <User style={{ width: '1.25rem', height: '1.25rem', color: '#9ca3af' }} />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <p style={{ fontWeight: 600, color: 'var(--color-brand-black)' }}>
+                                                            {bid.freelancerId?.name || 'Unknown Freelancer'}
+                                                        </p>
+                                                        <p style={{ fontSize: '0.75rem', color: '#71717a' }}>
+                                                            {bid.freelancerId?.email}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div style={{ textAlign: 'right' }}>
+                                                    <p style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-brand-orange)' }}>
+                                                        ${bid.price?.toLocaleString()}
+                                                    </p>
+                                                    {bid.status === 'hired' && (
+                                                        <span style={{
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '0.25rem',
+                                                            padding: '0.25rem 0.5rem',
+                                                            borderRadius: '9999px',
+                                                            backgroundColor: '#22c55e',
+                                                            color: 'white',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: 600
+                                                        }}>
+                                                            <CheckCircle style={{ width: '0.75rem', height: '0.75rem' }} />
+                                                            Hired
+                                                        </span>
+                                                    )}
+                                                    {bid.status === 'rejected' && (
+                                                        <span style={{
+                                                            padding: '0.25rem 0.5rem',
+                                                            borderRadius: '9999px',
+                                                            backgroundColor: '#f3f4f6',
+                                                            color: '#6b7280',
+                                                            fontSize: '0.75rem'
+                                                        }}>
+                                                            Not Selected
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <p style={{ color: '#52525b', fontSize: '0.875rem', lineHeight: 1.6, marginBottom: '1rem' }}>
+                                                {bid.message}
+                                            </p>
+
+                                            {gig.status === 'open' && bid.status === 'pending' && (
+                                                <button
+                                                    onClick={() => handleHire(bid._id)}
+                                                    disabled={hiringBidId === bid._id}
+                                                    className="btn-primary"
+                                                    style={{
+                                                        padding: '0.5rem 1.25rem',
+                                                        fontSize: '0.875rem',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem'
+                                                    }}
+                                                >
+                                                    {hiringBidId === bid._id ? 'Processing...' : (
+                                                        <>
+                                                            <CheckCircle style={{ width: '1rem', height: '1rem' }} />
+                                                            Hire This Freelancer
+                                                        </>
+                                                    )}
+                                                </button>
+                                            )}
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </motion.div>
