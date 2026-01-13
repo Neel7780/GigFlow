@@ -3,7 +3,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
 
 const WS_PORT = parseInt(process.env.WS_PORT || '8080', 10);
-const API_SECRET = process.env.API_SECRET || 'shared-secret-with-backend';
+const API_SECRET = process.env.API_SECRET || 'shared-secret';
 
 // Store connected clients by user ID
 const clients = new Map<string, Set<WebSocket>>();
@@ -40,6 +40,9 @@ const httpServer = http.createServer((req, res) => {
                 const data = JSON.parse(body);
                 const { userId, type, message, gigTitle } = data;
 
+                console.log(`[/notify] Received notification for userId: ${userId}, type: ${type}`);
+                console.log(`[/notify] Currently connected users: ${Array.from(clients.keys()).join(', ') || 'none'}`);
+
                 if (!userId) {
                     res.writeHead(400);
                     res.end(JSON.stringify({ error: 'userId is required' }));
@@ -56,6 +59,8 @@ const httpServer = http.createServer((req, res) => {
                         timestamp: new Date().toISOString(),
                     });
 
+                    console.log(`[/notify] Sending to ${userConnections.size} connection(s) for userId: ${userId}`);
+
                     userConnections.forEach((ws) => {
                         if (ws.readyState === WebSocket.OPEN) {
                             ws.send(notification);
@@ -68,6 +73,7 @@ const httpServer = http.createServer((req, res) => {
                         delivered: userConnections.size
                     }));
                 } else {
+                    console.log(`[/notify] User ${userId} is NOT connected`);
                     res.writeHead(200);
                     res.end(JSON.stringify({
                         success: true,

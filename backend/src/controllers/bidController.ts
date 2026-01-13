@@ -3,10 +3,8 @@ import mongoose from 'mongoose';
 import { Bid, Gig } from '../../db/models';
 import { CreateBidInput } from '../validators/schemas';
 
-// WebSocket server URL for notifications
 const WS_SERVER_URL = process.env.WS_SERVER_URL || 'http://localhost:8080';
 
-// Helper to notify WebSocket server when hired
 async function notifyHired(freelancerId: string, gigTitle: string): Promise<void> {
     try {
         await fetch(`${WS_SERVER_URL}/notify`, {
@@ -34,8 +32,11 @@ async function notifyBidPlaced(
     freelancerName: string,
     gigTitle: string
 ): Promise<void> {
+    const notifyUrl = `${WS_SERVER_URL}/notify`;
+    console.log(`[notifyBidPlaced] Sending notification to ${notifyUrl} for owner ${ownerId}`);
+
     try {
-        await fetch(`${WS_SERVER_URL}/notify`, {
+        const response = await fetch(notifyUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -48,8 +49,11 @@ async function notifyBidPlaced(
                 gigTitle,
             }),
         });
+
+        const responseBody = await response.text();
+        console.log(`[notifyBidPlaced] Response status: ${response.status}, body: ${responseBody}`);
     } catch (error) {
-        console.error('Failed to send bid notification:', error);
+        console.error('[notifyBidPlaced] Failed to send bid notification:', error);
         // Don't fail the request if notification fails
     }
 }
