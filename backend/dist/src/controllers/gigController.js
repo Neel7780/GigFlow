@@ -1,9 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getGigs = getGigs;
 exports.getGig = getGig;
 exports.createGig = createGig;
 exports.getMyGigs = getMyGigs;
+const mongoose_1 = __importDefault(require("mongoose"));
 const models_1 = require("../../db/models");
 // Get all open gigs with pagination and search
 async function getGigs(req, res) {
@@ -63,12 +67,26 @@ async function getGig(req, res) {
 // Create new gig
 async function createGig(req, res) {
     const userId = req.user._id;
-    const { title, description, budget, categoryId } = req.body;
+    // Extract fields from body. Note: validation is already done by middleware
+    const { title, description, budgetMin, budgetMax, budgetType, duration, skills, categoryId, category // Frontend might send 'category' instead of 'categoryId'
+     } = req.body;
+    // Validate categoryId is a valid ObjectId before assigning
+    let finalCategoryId = undefined;
+    if (categoryId && mongoose_1.default.isValidObjectId(categoryId)) {
+        finalCategoryId = categoryId;
+    }
+    else if (category && mongoose_1.default.isValidObjectId(category)) {
+        finalCategoryId = category;
+    }
     const gig = await models_1.Gig.create({
         title,
         description,
-        budget,
-        categoryId: categoryId || undefined,
+        budgetMin,
+        budgetMax,
+        budgetType: budgetType || 'fixed',
+        duration,
+        skills,
+        categoryId: finalCategoryId,
         ownerId: userId,
     });
     const populatedGig = await models_1.Gig.findById(gig._id)

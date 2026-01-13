@@ -49,10 +49,27 @@ const gigSchema = new mongoose_1.Schema({
         minlength: [20, 'Description must be at least 20 characters'],
         maxlength: [5000, 'Description cannot exceed 5000 characters'],
     },
-    budget: {
+    budgetMin: {
         type: Number,
-        required: [true, 'Budget is required'],
+        required: [true, 'Min budget is required'],
         min: [1, 'Budget must be at least 1'],
+    },
+    budgetMax: {
+        type: Number,
+        required: [true, 'Max budget is required'],
+        min: [1, 'Budget must be at least 1'],
+    },
+    budgetType: {
+        type: String,
+        enum: ['fixed', 'hourly'],
+        default: 'fixed',
+    },
+    duration: {
+        type: String,
+    },
+    skills: {
+        type: [String],
+        default: [],
     },
     ownerId: {
         type: mongoose_1.Schema.Types.ObjectId,

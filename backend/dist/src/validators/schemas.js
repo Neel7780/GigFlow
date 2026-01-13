@@ -41,6 +41,7 @@ exports.createCategorySchema = zod_1.z.object({
         .optional(),
 });
 // Gig schemas
+// Gig schemas
 exports.createGigSchema = zod_1.z.object({
     title: zod_1.z
         .string()
@@ -50,8 +51,13 @@ exports.createGigSchema = zod_1.z.object({
         .string()
         .min(20, 'Description must be at least 20 characters')
         .max(5000, 'Description cannot exceed 5000 characters'),
-    budget: zod_1.z.number().min(1, 'Budget must be at least 1'),
+    budgetMin: zod_1.z.number().min(1, 'Min budget must be at least 1'),
+    budgetMax: zod_1.z.number().min(1, 'Max budget must be at least 1'),
+    budgetType: zod_1.z.enum(['fixed', 'hourly']).optional(),
+    duration: zod_1.z.string().optional(),
+    skills: zod_1.z.array(zod_1.z.string()).optional(),
     categoryId: zod_1.z.string().optional(),
+    category: zod_1.z.string().optional(), // Allow category name or ID as fallback
 });
 // Bid schemas
 exports.createBidSchema = zod_1.z.object({

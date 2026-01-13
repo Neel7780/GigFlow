@@ -4,7 +4,11 @@ export interface IGig extends Document {
     _id: mongoose.Types.ObjectId;
     title: string;
     description: string;
-    budget: number;
+    budgetMin: number;
+    budgetMax: number;
+    budgetType: 'fixed' | 'hourly';
+    duration?: string;
+    skills?: string[];
     ownerId: mongoose.Types.ObjectId;
     categoryId?: mongoose.Types.ObjectId;
     status: GigStatus;

@@ -21,8 +21,16 @@ export declare const createCategorySchema: z.ZodObject<{
 export declare const createGigSchema: z.ZodObject<{
     title: z.ZodString;
     description: z.ZodString;
-    budget: z.ZodNumber;
+    budgetMin: z.ZodNumber;
+    budgetMax: z.ZodNumber;
+    budgetType: z.ZodOptional<z.ZodEnum<{
+        fixed: "fixed";
+        hourly: "hourly";
+    }>>;
+    duration: z.ZodOptional<z.ZodString>;
+    skills: z.ZodOptional<z.ZodArray<z.ZodString>>;
     categoryId: z.ZodOptional<z.ZodString>;
+    category: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 export declare const createBidSchema: z.ZodObject<{
     gigId: z.ZodString;
