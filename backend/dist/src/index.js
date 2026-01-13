@@ -13,8 +13,20 @@ const routes_1 = require("./routes");
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
 // CORS configuration
+// CORS configuration
 app.use((0, cors_1.default)({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: (origin, callback) => {
+        const allowedOrigins = [
+            'http://localhost:5173',
+            ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [])
+        ];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true, // Allow cookies
 }));
 // Body parsing
